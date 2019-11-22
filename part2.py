@@ -40,6 +40,12 @@ class NetworkLstm(tnn.Module):
         TODO:
         Create and initialise weights and biases for the layers.
         """
+        ## Insert comment here
+        self.lstm = tnn.LSTM(50, 100, batch_first=True)
+        self.dense1 = tnn.Linear(100,64)
+        self.A1 = tnn.ReLU()
+        self.dense2 = tnn.Linear(64,1)
+        return
 
     def forward(self, input, length):
         """
@@ -47,7 +53,14 @@ class NetworkLstm(tnn.Module):
         TODO:
         Create the forward pass through the network.
         """
+        ## Insert comment here
+        o, (h_n,h_c) = self.lstm(input)
+        x = h_n
+        x = self.dense1(x)
+        x = self.A1(x)
+        x = self.dense2(x).view(-1)
 
+        return torch.sigmoid(x)
 
 # Class for creating the neural network.
 class NetworkCnn(tnn.Module):
@@ -72,6 +85,17 @@ class NetworkCnn(tnn.Module):
         TODO:
         Create and initialise weights and biases for the layers.
         """
+        ## Insert comment here
+        self.Conv1 = tnn.Conv1d(50, 50, 8, padding=5,)
+        self.ReLU = tnn.ReLU()
+        self.Pool1 = tnn.MaxPool1d(4)
+        self.Conv2 = tnn.Conv1d(50, 50, 8, padding=5)
+        # ReLu
+        self.Pool2 = tnn.MaxPool1d(4)
+        self.Conv3 = tnn.Conv1d(50, 50, 8, padding=5)
+        # ReLu
+        self.Global_Pool = tnn.functional.max_pool1d
+        self.Dense = tnn.Linear(50, 1)
 
     def forward(self, input, length):
         """
@@ -79,6 +103,18 @@ class NetworkCnn(tnn.Module):
         TODO:
         Create the forward pass through the network.
         """
+        ## Insert comment here
+        x = self.Conv1(input.permute(0,2,1))
+        x = self.ReLU(x)
+        x = self.Pool1(x)
+        x = self.Conv2(x)
+        x = self.ReLU(x)
+        x = self.Pool2(x)
+        x = self.Conv3(x)
+        x = self.ReLU(x)
+        x = self.Global_Pool(x,kernel_size=x.shape[2])
+        x = self.Dense(x.view(-1,50))
+        return torch.sigmoid(x).view(-1)
 
 
 def lossFunc():
@@ -88,6 +124,8 @@ def lossFunc():
     will add a sigmoid to the output and calculate the binary
     cross-entropy.
     """
+    ## Insert comment here
+    return tnn.BCELoss()
 
 
 def measures(outputs, labels):
@@ -99,6 +137,26 @@ def measures(outputs, labels):
 
     outputs and labels are torch tensors.
     """
+    ## Insert comment here
+    length = labels.shape[0]
+    tp_batch = 0
+    tn_batch = 0
+    fp_batch = 0
+    fn_batch = 0
+    outputs = (outputs.view(-1) >= 0.5).to(int)
+    ## Insert comment here
+    for i in range(length):
+        if outputs[i] - labels[i] == 1:
+            fp_batch += 1
+        if outputs[i] - labels[i] == -1:
+            fn_batch += 1
+        if outputs[i] - labels[i] == 0:
+            if outputs[i] == 1:
+                tp_batch += 1
+            else:
+                tn_batch += 1
+    
+    return tp_batch, tn_batch, fp_batch, fn_batch
 
 
 def main():
