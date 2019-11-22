@@ -42,9 +42,9 @@ class NetworkLstm(tnn.Module):
         """
         ## Insert comment here
         self.lstm = tnn.LSTM(50, 100, batch_first=True)
-        self.dense1 = tnn.Linear(100,64)
+        self.Dense1 = tnn.Linear(100,64)
         self.A1 = tnn.ReLU()
-        self.dense2 = tnn.Linear(64,1)
+        self.Dense2 = tnn.Linear(64,1)
         return
 
     def forward(self, input, length):
@@ -56,9 +56,9 @@ class NetworkLstm(tnn.Module):
         ## Insert comment here
         o, (h_n,h_c) = self.lstm(input)
         x = h_n
-        x = self.dense1(x)
+        x = self.Dense1(x)
         x = self.A1(x)
-        x = self.dense2(x).view(-1)
+        x = self.Dense2(x).view(-1)
 
         return torch.sigmoid(x)
 
