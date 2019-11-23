@@ -58,7 +58,7 @@ class NetworkLstm(tnn.Module):
         Create the forward pass through the network.
         """
         ## Forward: LSTM(hidden dim = 100) -> Linear(64) -> ReLu-> Linear(1)
-        o, (h_n,h_c) = self.lstm(input)
+        o, (h_n,h_c) = self.LSTM(input)
         x = h_n
         x = self.D1(x)
         x = self.ReLu(x)
