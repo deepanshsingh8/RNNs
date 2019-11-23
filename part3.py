@@ -13,15 +13,14 @@ class Network(tnn.Module):
     def __init__(self):
         super(Network, self).__init__()
         # similar LSTM setup from p2
-        self.LSTM = tnn.LSTM(50, 300, 1,batch_first=True)
-        self.SELU = tnn.SELU()
-        self.D_Out = tnn.Dropout(0.5)
-        self.N = tnn.BatchNorm1d(250)
-        self.D1 = tnn.Linear(300, 250)
-        self.D2 = tnn.Linear(250, 200)
-        self.D3 = tnn.Linear(200, 128)
-        self.D4 = tnn.Linear(128,64)
-        self.D5 = tnn.Linear(64,1)
+        self.LSTM = tnn.LSTM(50, 300, 1, batch_first=True)
+        self.GELU = tnn.functional.gelu()
+        self.D1 = tnn.Linear(300, 256)
+        self.D2 = tnn.Linear(256,128)
+        self.D3 = tnn.Linear(128,64)
+        self.D4 = tnn.Linear(64,1)
+        self.N = tnn.BatchNorm1d(256)
+        return
 
 
     def forward(self, input, length):
@@ -31,18 +30,13 @@ class Network(tnn.Module):
         """
         o,(h_n,h_c) = self.LSTM(input)
         # remodel setup form p2
-        x = self.SELU(o[:,-1,:].view(-1,300))
+        x = self.GELU(o[:,-1,:].view(-1,300))
         x = self.D1(x)
         x = self.N(x)
-        x = self.D_Out(x)
         x = self.D2(x)
-        x = self.D_Out(x)
+        x = self.GELU(x)
         x = self.D3(x)
-        x = self.D_Out(x)
-        x = self.SELU(x)
         x = self.D4(x)
-        x = self.D_Out(x)
-        x = self.D5(x)
 
         return x.view(-1)
 
@@ -128,6 +122,8 @@ def main():
             if i % 32 == 31:
                 print("Epoch: %2d, Batch: %4d, Loss: %.3f" % (epoch + 1, i + 1, running_loss / 32))
                 running_loss = 0
+
+        scheduler.step()
 
     num_correct = 0
 
