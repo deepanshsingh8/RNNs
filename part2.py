@@ -134,7 +134,7 @@ class NetworkCnn(tnn.Module):
         x = self.C2(x)
 
         # -> ReLu
-        x = self.ReLU(x)
+        x = self.ReLu(x)
 
         # -> maxpool(size=4)
         x = self.P2(x)
@@ -143,7 +143,7 @@ class NetworkCnn(tnn.Module):
         x = self.C3(x)
 
         # -> ReLu 
-        x = self.ReLU(x)
+        x = self.ReLu(x)
 
         # -> maxpool over time (global pooling)
         x = self.G_Pool(x,kernel_size=x.shape[2])
