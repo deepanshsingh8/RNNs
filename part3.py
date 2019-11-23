@@ -12,12 +12,39 @@ from imdb_dataloader import IMDB
 class Network(tnn.Module):
     def __init__(self):
         super(Network, self).__init__()
+        # similar LSTM setup from p2
+        self.LSTM = tnn.LSTM(50, 300, 1,batch_first=True)
+        self.SELU = tnn.SELU()
+        self.D_Out = tnn.Dropout(0.5)
+        self.N = tnn.BatchNorm1d(250)
+        self.D1 = tnn.Linear(300, 250)
+        self.D2 = tnn.Linear(250, 200)
+        self.D3 = tnn.Linear(200, 128)
+        self.D4 = tnn.Linear(128,64)
+        self.D5 = tnn.Linear(64,1)
+
 
     def forward(self, input, length):
         """
         DO NOT MODIFY FUNCTION SIGNATURE
         Create the forward pass through the network.
         """
+        o,(h_n,h_c) = self.LSTM(input)
+        # remodel setup form p2
+        x = self.SELU(o[:,-1,:].view(-1,300))
+        x = self.D1(x)
+        x = self.N(x)
+        x = self.D_Out(x)
+        x = self.D2(x)
+        x = self.DOut(x)
+        x = self.D3(x)
+        x = self.D_Out(x)
+        x = self.SELU(x)
+        x = self.D4(x)
+        x = self.D_Out(x)
+        x = self.D5(x)
+
+        return x.view(-1)
 
 
 class PreProcessing():
@@ -37,11 +64,18 @@ def lossFunc():
     Define a loss function appropriate for the above networks that will
     add a sigmoid to the output and calculate the binary cross-entropy.
     """
+    # copy from p2
+    return tnn.BCELoss()
 
 def main():
     # Use a GPU if available, as it should be faster.
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print("Using device: " + str(device))
+
+    # TODO
+    # own code added to clear cuda cache
+    # remove before submission
+    torch.cuda.empty_cache()
 
     # Load the training dataset, and create a data loader to generate a batch.
     textField = PreProcessing.text_field
@@ -58,8 +92,12 @@ def main():
     net = Network().to(device)
     criterion =lossFunc()
     optimiser = topti.Adam(net.parameters(), lr=0.001)  # Minimise the loss using the Adam algorithm.
+    
+    # added
+    scheduler = torch.optim.lr_scheduler.StepLR(optimiser,step_size=6, gamma=0.7)
 
-    for epoch in range(10):
+    #epoch updated
+    for epoch in range(20):
         running_loss = 0
 
         for i, batch in enumerate(trainLoader):
@@ -74,7 +112,8 @@ def main():
             optimiser.zero_grad()
 
             # Forward pass through the network.
-            output = net(inputs, length)
+            #output = net(inputs, length)
+            output = torch.sigmoid(net(inputs, length))
 
             loss = criterion(output, labels)
 
