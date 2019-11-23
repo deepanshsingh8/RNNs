@@ -36,7 +36,7 @@ class Network(tnn.Module):
         x = self.N(x)
         x = self.D_Out(x)
         x = self.D2(x)
-        x = self.DOut(x)
+        x = self.D_Out(x)
         x = self.D3(x)
         x = self.D_Out(x)
         x = self.SELU(x)
