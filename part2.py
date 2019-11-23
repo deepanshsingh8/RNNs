@@ -41,10 +41,10 @@ class NetworkLstm(tnn.Module):
         Create and initialise weights and biases for the layers.
         """
         ## Insert comment here
-        self.lstm = tnn.LSTM(50, 100, batch_first=True)
-        self.Dense1 = tnn.Linear(100,64)
-        self.A1 = tnn.ReLU()
-        self.Dense2 = tnn.Linear(64,1)
+        self.LSTM = tnn.LSTM(50, 100, batch_first=True)
+        self.D1 = tnn.Linear(100,64)
+        self.ReLU = tnn.ReLU()
+        self.D2 = tnn.Linear(64,1)
         return
 
     def forward(self, input, length):
@@ -56,9 +56,9 @@ class NetworkLstm(tnn.Module):
         ## Insert comment here
         o, (h_n,h_c) = self.lstm(input)
         x = h_n
-        x = self.Dense1(x)
-        x = self.A1(x)
-        x = self.Dense2(x).view(-1)
+        x = self.D1(x)
+        x = self.ReLU(x)
+        x = self.D2(x).view(-1)
 
         return torch.sigmoid(x)
 
@@ -86,16 +86,14 @@ class NetworkCnn(tnn.Module):
         Create and initialise weights and biases for the layers.
         """
         ## Insert comment here
-        self.Conv1 = tnn.Conv1d(50, 50, 8, padding=5,)
+        self.C1 = tnn.Conv1d(50, 50, 8, padding=5,)
         self.ReLU = tnn.ReLU()
-        self.Pool1 = tnn.MaxPool1d(4)
-        self.Conv2 = tnn.Conv1d(50, 50, 8, padding=5)
-        # ReLu
-        self.Pool2 = tnn.MaxPool1d(4)
-        self.Conv3 = tnn.Conv1d(50, 50, 8, padding=5)
-        # ReLu
-        self.Global_Pool = tnn.functional.max_pool1d
-        self.Dense = tnn.Linear(50, 1)
+        self.P1 = tnn.MaxPool1d(4)
+        self.C2 = tnn.Conv1d(50, 50, 8, padding=5)
+        self.P2 = tnn.MaxPool1d(4)
+        self.C3 = tnn.Conv1d(50, 50, 8, padding=5)
+        self.G_Pool = tnn.functional.max_pool1d
+        self.D = tnn.Linear(50, 1)
 
     def forward(self, input, length):
         """
@@ -104,16 +102,16 @@ class NetworkCnn(tnn.Module):
         Create the forward pass through the network.
         """
         ## Insert comment here
-        x = self.Conv1(input.permute(0,2,1))
+        x = self.C1(input.permute(0,2,1))
         x = self.ReLU(x)
-        x = self.Pool1(x)
-        x = self.Conv2(x)
+        x = self.P1(x)
+        x = self.C2(x)
         x = self.ReLU(x)
-        x = self.Pool2(x)
-        x = self.Conv3(x)
+        x = self.P2(x)
+        x = self.C3(x)
         x = self.ReLU(x)
-        x = self.Global_Pool(x,kernel_size=x.shape[2])
-        x = self.Dense(x.view(-1,50))
+        x = self.G_Pool(x,kernel_size=x.shape[2])
+        x = self.D(x.view(-1,50))
         return torch.sigmoid(x).view(-1)
 
 
