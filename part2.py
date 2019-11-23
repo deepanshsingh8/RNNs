@@ -40,10 +40,14 @@ class NetworkLstm(tnn.Module):
         TODO:
         Create and initialise weights and biases for the layers.
         """
-        ## Insert comment here
+        ## Setup: LSTM(hidden dim = 100) -> Linear(64) -> ReLu-> Linear(1)
+        # LSTM(hidden dim = 100)
         self.LSTM = tnn.LSTM(50, 100, batch_first=True)
+        # Linear(64)
         self.D1 = tnn.Linear(100,64)
-        self.ReLU = tnn.ReLU()
+        # ReLu
+        self.ReLu = tnn.ReLU()
+        # Linear(1)
         self.D2 = tnn.Linear(64,1)
         return
 
@@ -53,11 +57,11 @@ class NetworkLstm(tnn.Module):
         TODO:
         Create the forward pass through the network.
         """
-        ## Insert comment here
+        ## Forward: LSTM(hidden dim = 100) -> Linear(64) -> ReLu-> Linear(1)
         o, (h_n,h_c) = self.lstm(input)
         x = h_n
         x = self.D1(x)
-        x = self.ReLU(x)
+        x = self.ReLu(x)
         x = self.D2(x).view(-1)
 
         return torch.sigmoid(x)
@@ -85,14 +89,26 @@ class NetworkCnn(tnn.Module):
         TODO:
         Create and initialise weights and biases for the layers.
         """
-        ## Insert comment here
-        self.C1 = tnn.Conv1d(50, 50, 8, padding=5,)
-        self.ReLU = tnn.ReLU()
+        ## Setup: 
+        # Conv -> ReLu -> maxpool(size=4) -> Conv -> ReLu -> maxpool(size=4) ->
+        # Conv -> ReLu -> maxpool over time (global pooling) -> Linear(1)
+        
+        # ReLu
+        self.ReLu = tnn.ReLU()
+
+        # maxpool(size=4)
         self.P1 = tnn.MaxPool1d(4)
-        self.C2 = tnn.Conv1d(50, 50, 8, padding=5)
         self.P2 = tnn.MaxPool1d(4)
-        self.C3 = tnn.Conv1d(50, 50, 8, padding=5)
+        
+        # maxpool over time (global pooling)
         self.G_Pool = tnn.functional.max_pool1d
+
+        # Conv
+        self.C1 = tnn.Conv1d(50, 50, 8, padding=5,)
+        self.C2 = tnn.Conv1d(50, 50, 8, padding=5)
+        self.C3 = tnn.Conv1d(50, 50, 8, padding=5)
+
+        # Linear(1)
         self.D = tnn.Linear(50, 1)
 
     def forward(self, input, length):
@@ -101,17 +117,40 @@ class NetworkCnn(tnn.Module):
         TODO:
         Create the forward pass through the network.
         """
-        ## Insert comment here
+        ## Forward: 
+        # Conv -> ReLu -> maxpool(size=4) -> Conv -> ReLu -> maxpool(size=4) ->
+        # Conv -> ReLu -> maxpool over time (global pooling) -> Linear(1)
+        
+        # Conv
         x = self.C1(input.permute(0,2,1))
-        x = self.ReLU(x)
+
+        # -> ReLu 
+        x = self.ReLu(x)
+
+        # -> maxpool(size=4)
         x = self.P1(x)
+
+        # -> Conv
         x = self.C2(x)
+
+        # -> ReLu
         x = self.ReLU(x)
+
+        # -> maxpool(size=4)
         x = self.P2(x)
+
+        # -> Conv
         x = self.C3(x)
+
+        # -> ReLu 
         x = self.ReLU(x)
+
+        # -> maxpool over time (global pooling)
         x = self.G_Pool(x,kernel_size=x.shape[2])
+
+        # -> Linear(1)
         x = self.D(x.view(-1,50))
+
         return torch.sigmoid(x).view(-1)
 
 
@@ -122,7 +161,7 @@ def lossFunc():
     will add a sigmoid to the output and calculate the binary
     cross-entropy.
     """
-    ## Insert comment here
+    ## return the necessary loss function
     return tnn.BCELoss()
 
 
@@ -135,14 +174,15 @@ def measures(outputs, labels):
 
     outputs and labels are torch tensors.
     """
-    ## Insert comment here
+    ## Setup return values
     length = labels.shape[0]
     tp_batch = 0
     tn_batch = 0
     fp_batch = 0
     fn_batch = 0
     outputs = (outputs.view(-1) >= 0.5).to(int)
-    ## Insert comment here
+    
+    ## iterate through and increment for each result
     for i in range(length):
         if outputs[i] - labels[i] == 1:
             fp_batch += 1
