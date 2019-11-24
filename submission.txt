@@ -1,0 +1,42 @@
+Session: 19T3
+
+Submission: hw2
+------------------------------
+Files found: part3.py part2.py part1.py model.pth
+------------------------------
+
+stdin: is not a tty
+
+Applying simple tests to your submission...
+===========================================
+============================= test session starts ==============================
+platform linux -- Python 3.7.3, pytest-3.0.6, py-1.4.32, pluggy-0.4.0 -- /usr/bin/python3
+cachedir: .cache
+rootdir: /var/tmp/.testgive1leNqt, inifile: 
+collecting ... collected 8 items
+
+sub_test.py::test_rnnCell PASSED
+sub_test.py::test_rnn PASSED
+sub_test.py::test_rnnSimplified PASSED
+sub_test.py::test_lstm PASSED
+sub_test.py::test_conv FAILED
+sub_test.py::test_part2_networks PASSED
+sub_test.py::test_measures PASSED
+sub_test.py::test_part3 
+Importing your code..
+Using device: cpu
+Loading Model..
+Creating Vocab objects..
+Loading submission test samples..
+Loaded 652 samples
+Evaluating model..
+Submission accuracy = 76.07%
+PASSED
+
+====================== 1 failed, 7 passed in 3.97 seconds ======================
+
+Submission datestamp:	Sun Nov 24 13:48:38 2019
+Assignment deadline:	Sun Nov 24 23:59:59 2019
+This submission is 10 hours early
+Your submission is ACCEPTED.
+    
