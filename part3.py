@@ -13,13 +13,14 @@ class Network(tnn.Module):
     def __init__(self):
         super(Network, self).__init__()
         # similar LSTM setup from p2
-        self.LSTM = tnn.LSTM(50, 300, 1, batch_first=True)
-        self.GELU = tnn.functional.gelu()
-        self.D1 = tnn.Linear(300, 256)
-        self.D2 = tnn.Linear(256,128)
-        self.D3 = tnn.Linear(128,64)
-        self.D4 = tnn.Linear(64,1)
-        self.N = tnn.BatchNorm1d(256)
+        self.LSTM = tnn.LSTM(50, 200, batch_first=True)
+        #self.ReLu = tnn.ReLU()
+        self.D1 = tnn.Linear(200, 128)
+        self.D2 = tnn.Linear(128, 64)
+        self.D3 = tnn.Linear(64,32)
+        self.D4 = tnn.Linear(32,1)
+        self.N1 = tnn.BatchNorm1d(128)
+        self.N2 = tnn.BatchNorm1d(32)
         return
 
 
@@ -30,15 +31,17 @@ class Network(tnn.Module):
         """
         o,(h_n,h_c) = self.LSTM(input)
         # remodel setup form p2
-        x = self.GELU(o[:,-1,:].view(-1,300))
+        x = tnn.functional.gelu(o[:,-1,:].view(-1,200))
+        #x = h_n
         x = self.D1(x)
-        x = self.N(x)
+        x = self.N1(x)
         x = self.D2(x)
-        x = self.GELU(x)
+        x = tnn.functional.gelu(x)
         x = self.D3(x)
+        x = self.N2(x)
         x = self.D4(x)
 
-        return x.view(-1)
+        return (x).view(-1)
 
 
 class PreProcessing():
@@ -91,7 +94,7 @@ def main():
     scheduler = torch.optim.lr_scheduler.StepLR(optimiser,step_size=6, gamma=0.7)
 
     #epoch updated
-    for epoch in range(20):
+    for epoch in range(10):
         running_loss = 0
 
         for i, batch in enumerate(trainLoader):
@@ -122,9 +125,8 @@ def main():
             if i % 32 == 31:
                 print("Epoch: %2d, Batch: %4d, Loss: %.3f" % (epoch + 1, i + 1, running_loss / 32))
                 running_loss = 0
-
+                
         scheduler.step()
-
     num_correct = 0
 
     # Save mode
