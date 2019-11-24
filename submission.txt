@@ -12,7 +12,7 @@ Applying simple tests to your submission...
 ============================= test session starts ==============================
 platform linux -- Python 3.7.3, pytest-3.0.6, py-1.4.32, pluggy-0.4.0 -- /usr/bin/python3
 cachedir: .cache
-rootdir: /var/tmp/.testgive8vKPZu, inifile: 
+rootdir: /var/tmp/.testgive9TyDNh, inifile: 
 collecting ... collected 8 items
 
 sub_test.py::test_rnnCell PASSED
@@ -30,12 +30,12 @@ Creating Vocab objects..
 Loading submission test samples..
 Loaded 652 samples
 Evaluating model..
-Submission accuracy = 82.36%
+Submission accuracy = 83.90%
 PASSED
 
-====================== 1 failed, 7 passed in 7.11 seconds ======================
+====================== 1 failed, 7 passed in 7.04 seconds ======================
 
-Submission datestamp:	Sun Nov 24 18:54:42 2019
+Submission datestamp:	Sun Nov 24 20:35:32 2019
 Assignment deadline:	Sun Nov 24 23:59:59 2019
-This submission is 5 hours early
+This submission is 3 hours early
 Your submission is ACCEPTED.
