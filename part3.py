@@ -89,9 +89,6 @@ def main():
     net = Network().to(device)
     criterion =lossFunc()
     optimiser = topti.Adam(net.parameters(), lr=0.001)  # Minimise the loss using the Adam algorithm.
-    
-    # added
-    scheduler = torch.optim.lr_scheduler.StepLR(optimiser,step_size=6, gamma=0.7)
 
     #epoch updated
     for epoch in range(10):
@@ -126,7 +123,6 @@ def main():
                 print("Epoch: %2d, Batch: %4d, Loss: %.3f" % (epoch + 1, i + 1, running_loss / 32))
                 running_loss = 0
                 
-        scheduler.step()
     num_correct = 0
 
     # Save mode
