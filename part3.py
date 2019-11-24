@@ -1,4 +1,5 @@
 import numpy as np
+import re
 import torch
 import torch.nn as tnn
 import torch.nn.functional as F
@@ -16,8 +17,10 @@ class Network(tnn.Module):
         self.LSTM = tnn.LSTM(50, 200, batch_first=True)
         self.D1 = tnn.Linear(200, 128)
         self.D2 = tnn.Linear(128, 64)
-        self.D3 = tnn.Linear(64, 1)
+        self.D3 = tnn.Linear(64, 32)
+        self.D4 = tnn.Linear(32, 1)
         self.N1 = tnn.BatchNorm1d(128)
+        self.N2 = tnn.BatchNorm1d(32)
         return
 
 
@@ -35,6 +38,8 @@ class Network(tnn.Module):
         x = self.D2(x)
         x = tnn.functional.gelu(x)
         x = self.D3(x)
+        x = self.N2(x)
+        x = self.D4(x)
 
         return (x).view(-1)
 
@@ -42,7 +47,10 @@ class Network(tnn.Module):
 class PreProcessing():
     def pre(x):
         """Called after tokenization"""
-        return x
+        result = []
+        for item in x:
+            result.append(re.sub('[^a-zA-Z0-9-_*.]', '', item))
+        return result
 
     def post(batch, vocab):
         """Called after numericalization but prior to vectorization"""
