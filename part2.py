@@ -44,9 +44,9 @@ class NetworkLstm(tnn.Module):
         # LSTM(hidden dim = 100)
         self.LSTM = tnn.LSTM(50, 100, batch_first=True)
         # Linear(64)
-        self.D1 = tnn.Linear(100,64)
+        self.D1 = tnn.Linear(100, 64)
         # Linear(1)
-        self.D2 = tnn.Linear(64,1)
+        self.D2 = tnn.Linear(64, 1)
         return
 
     def forward(self, input, length):
@@ -60,7 +60,7 @@ class NetworkLstm(tnn.Module):
         x = h_n
         x = self.D1(x)
         x = tnn.functional.relu(x)
-        x = self.D2(x).view(-1)
+        x = self.D2(x)
 
         return x.view(-1)
 
@@ -91,9 +91,9 @@ class NetworkCnn(tnn.Module):
         # Conv -> ReLu -> maxpool(size=4) -> Conv -> ReLu -> maxpool(size=4) ->
         # Conv -> ReLu -> maxpool over time (global pooling) -> Linear(1)
         # Conv
-        self.C1 = tnn.Conv1d(50, 50, 8, padding=5,)
-        self.C2 = tnn.Conv1d(50, 50, 8, padding=5)
-        self.C3 = tnn.Conv1d(50, 50, 8, padding=5)
+        self.C1 = tnn.Conv1d(50, 50, kernel_size=8, padding=5)
+        self.C2 = tnn.Conv1d(50, 50, kernel_size=8, padding=5)
+        self.C3 = tnn.Conv1d(50, 50, kernel_size=8, padding=5)
 
         # Linear(1)
         self.D = tnn.Linear(50, 1)
