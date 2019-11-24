@@ -17,10 +17,9 @@ class Network(tnn.Module):
         #self.ReLu = tnn.ReLU()
         self.D1 = tnn.Linear(200, 128)
         self.D2 = tnn.Linear(128, 64)
-        self.D3 = tnn.Linear(64,32)
-        self.D4 = tnn.Linear(32,1)
+        self.D3 = tnn.Linear(64, 1)
         self.N1 = tnn.BatchNorm1d(128)
-        self.N2 = tnn.BatchNorm1d(32)
+        #self.N2 = tnn.BatchNorm1d(64)
         return
 
 
@@ -38,8 +37,6 @@ class Network(tnn.Module):
         x = self.D2(x)
         x = tnn.functional.gelu(x)
         x = self.D3(x)
-        x = self.N2(x)
-        x = self.D4(x)
 
         return (x).view(-1)
 
@@ -87,11 +84,11 @@ def main():
                                                          sort_key=lambda x: len(x.text), sort_within_batch=True)
 
     net = Network().to(device)
-    criterion =lossFunc()
+    criterion = lossFunc()
     optimiser = topti.Adam(net.parameters(), lr=0.001)  # Minimise the loss using the Adam algorithm.
 
     #epoch updated
-    for epoch in range(10):
+    for epoch in range(30):
         running_loss = 0
 
         for i, batch in enumerate(trainLoader):
@@ -122,7 +119,7 @@ def main():
             if i % 32 == 31:
                 print("Epoch: %2d, Batch: %4d, Loss: %.3f" % (epoch + 1, i + 1, running_loss / 32))
                 running_loss = 0
-                
+
     num_correct = 0
 
     # Save mode
