@@ -94,7 +94,7 @@ def main():
     optimiser = topti.Adam(net.parameters(), lr=0.001)  # Minimise the loss using the Adam algorithm.
 
     #epoch updated
-    for epoch in range(10):
+    for epoch in range(20):
         running_loss = 0
 
         for i, batch in enumerate(trainLoader):
