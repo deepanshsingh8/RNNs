@@ -64,7 +64,7 @@ class NetworkLstm(tnn.Module):
         x = self.ReLu(x)
         x = self.D2(x).view(-1)
 
-        return torch.sigmoid(x)
+        return x.view(-1)
 
 # Class for creating the neural network.
 class NetworkCnn(tnn.Module):
@@ -151,7 +151,7 @@ class NetworkCnn(tnn.Module):
         # -> Linear(1)
         x = self.D(x.view(-1,50))
 
-        return torch.sigmoid(x).view(-1)
+        return x.view(-1)
 
 
 def lossFunc():
@@ -162,7 +162,7 @@ def lossFunc():
     cross-entropy.
     """
     ## return the necessary loss function
-    return tnn.BCELoss()
+    return tnn.BCEWithLogitsLoss()
 
 
 def measures(outputs, labels):
@@ -216,7 +216,7 @@ def main():
                                                          sort_key=lambda x: len(x.text), sort_within_batch=True)
 
     # Create an instance of the network in memory (potentially GPU memory). Can change to NetworkCnn during development.
-    net = NetworkLstm().to(device)
+    net = NetworkCnn().to(device)
 
     criterion = lossFunc()
     optimiser = topti.Adam(net.parameters(), lr=0.001)  # Minimise the loss using the Adam algorithm.
