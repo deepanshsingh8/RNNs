@@ -45,8 +45,6 @@ class NetworkLstm(tnn.Module):
         self.LSTM = tnn.LSTM(50, 100, batch_first=True)
         # Linear(64)
         self.D1 = tnn.Linear(100,64)
-        # ReLu
-        self.ReLu = tnn.ReLU()
         # Linear(1)
         self.D2 = tnn.Linear(64,1)
         return
@@ -61,7 +59,7 @@ class NetworkLstm(tnn.Module):
         o, (h_n,h_c) = self.LSTM(input)
         x = h_n
         x = self.D1(x)
-        x = self.ReLu(x)
+        x = tnn.functional.relu(x)
         x = self.D2(x).view(-1)
 
         return x.view(-1)
@@ -92,17 +90,6 @@ class NetworkCnn(tnn.Module):
         ## Setup: 
         # Conv -> ReLu -> maxpool(size=4) -> Conv -> ReLu -> maxpool(size=4) ->
         # Conv -> ReLu -> maxpool over time (global pooling) -> Linear(1)
-        
-        # ReLu
-        self.ReLu = tnn.ReLU()
-
-        # maxpool(size=4)
-        self.P1 = tnn.MaxPool1d(4)
-        self.P2 = tnn.MaxPool1d(4)
-        
-        # maxpool over time (global pooling)
-        self.G_Pool = tnn.functional.max_pool1d
-
         # Conv
         self.C1 = tnn.Conv1d(50, 50, 8, padding=5,)
         self.C2 = tnn.Conv1d(50, 50, 8, padding=5)
@@ -110,6 +97,8 @@ class NetworkCnn(tnn.Module):
 
         # Linear(1)
         self.D = tnn.Linear(50, 1)
+
+        self.adaptive = tnn.AdaptiveMaxPool1d(1)
 
     def forward(self, input, length):
         """
@@ -120,33 +109,34 @@ class NetworkCnn(tnn.Module):
         ## Forward: 
         # Conv -> ReLu -> maxpool(size=4) -> Conv -> ReLu -> maxpool(size=4) ->
         # Conv -> ReLu -> maxpool over time (global pooling) -> Linear(1)
+
         
         # Conv
         x = self.C1(input.permute(0,2,1))
 
         # -> ReLu 
-        x = self.ReLu(x)
+        x = tnn.functional.relu(x)
 
         # -> maxpool(size=4)
-        x = self.P1(x)
+        x = tnn.functional.max_pool1d(x,kernel_size = 4)
 
         # -> Conv
         x = self.C2(x)
 
         # -> ReLu
-        x = self.ReLu(x)
+        x = tnn.functional.relu(x)
 
         # -> maxpool(size=4)
-        x = self.P2(x)
+        x = tnn.functional.max_pool1d(x,kernel_size = 4)
 
         # -> Conv
         x = self.C3(x)
 
         # -> ReLu 
-        x = self.ReLu(x)
-
+        x = tnn.functional.relu(x)
+        
         # -> maxpool over time (global pooling)
-        x = self.G_Pool(x,kernel_size=x.shape[2])
+        x = self.adaptive(x)
 
         # -> Linear(1)
         x = self.D(x.view(-1,50))
@@ -180,8 +170,15 @@ def measures(outputs, labels):
     tn_batch = 0
     fp_batch = 0
     fn_batch = 0
-    outputs = (outputs.view(-1) >= 0.5).to(int)
-    
+    outputs = torch.sigmoid(outputs)
+    for i in range(0,len(outputs)):
+      if outputs[i] <0.5:
+        outputs[i] = 0
+      else:
+        outputs[i] =1
+      
+    # outputs = (outputs.view(-1) >= 0.5).to(int)
+
     ## iterate through and increment for each result
     for i in range(length):
         if outputs[i] - labels[i] == 1:
