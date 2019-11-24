@@ -14,12 +14,10 @@ class Network(tnn.Module):
         super(Network, self).__init__()
         # similar LSTM setup from p2
         self.LSTM = tnn.LSTM(50, 200, batch_first=True)
-        #self.ReLu = tnn.ReLU()
         self.D1 = tnn.Linear(200, 128)
         self.D2 = tnn.Linear(128, 64)
         self.D3 = tnn.Linear(64, 1)
         self.N1 = tnn.BatchNorm1d(128)
-        #self.N2 = tnn.BatchNorm1d(64)
         return
 
 
@@ -59,7 +57,7 @@ def lossFunc():
     add a sigmoid to the output and calculate the binary cross-entropy.
     """
     # copy from p2
-    return tnn.BCELoss()
+    return tnn.BCEWithLogitsLoss()
 
 def main():
     # Use a GPU if available, as it should be faster.
@@ -88,10 +86,11 @@ def main():
     optimiser = topti.Adam(net.parameters(), lr=0.001)  # Minimise the loss using the Adam algorithm.
 
     #epoch updated
-    for epoch in range(30):
+    for epoch in range(10):
         running_loss = 0
 
         for i, batch in enumerate(trainLoader):
+            
             # Get a batch and potentially send it to GPU memory.
             inputs, length, labels = textField.vocab.vectors[batch.text[0]].to(device), batch.text[1].to(
                 device), batch.label.type(torch.FloatTensor).to(device)
@@ -114,11 +113,14 @@ def main():
             # Minimise the loss according to the gradient.
             optimiser.step()
 
-            running_loss += loss.item()
+            running_loss += loss.detach().item()
 
             if i % 32 == 31:
                 print("Epoch: %2d, Batch: %4d, Loss: %.3f" % (epoch + 1, i + 1, running_loss / 32))
                 running_loss = 0
+                
+            del inputs, length, labels, output, loss
+            torch.cuda.empty_cache()
 
     num_correct = 0
 
